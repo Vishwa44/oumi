@@ -55,6 +55,17 @@ class SimpleMLP(nn.Module):
             with_modules=True,
             row_limit=3,
         ),
+        ProfilerParams(
+            enable_cpu_profiling=True,
+            enable_cuda_profiling=False,
+            record_shapes=True,
+            profile_memory=True,
+            with_stack=True,
+            with_flops=True,
+            with_modules=True,
+            row_limit=3,
+            tensorboard_profile=True,
+        ),
     ],
 )
 def test_torch_profile(params: ProfilerParams):

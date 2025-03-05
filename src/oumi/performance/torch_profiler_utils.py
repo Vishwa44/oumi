@@ -101,9 +101,18 @@ def _on_trace_ready(
     if save_dir_path:
         # Save gzip-ed trace (JSON traces compress extremely well).
         # Open traces on https://ui.perfetto.dev/ or `chrome://tracing`
-        file_name: pathlib.Path = save_dir_path / f"{out_prefix}_pt_trace.json.gz"
-        logger.info(f"Exporting profiler Chrome trace to {file_name} ...")
-        prof.export_chrome_trace(str(file_name))
+        if params.tensorboard_profile:
+            tensorboard_dir: pathlib.Path = save_dir_path / "tensorbboard"
+            logger.info(
+                f"Exporting profiler Tensorboard trace to {tensorboard_dir} ..."
+            )
+            torch.profiler.tensorboard_trace_handler(dir_name=str(tensorboard_dir))(
+                prof
+            )
+        else:
+            file_name: pathlib.Path = save_dir_path / f"{out_prefix}_pt_trace.json.gz"
+            logger.info(f"Exporting profiler Chrome trace to {file_name} ...")
+            prof.export_chrome_trace(str(file_name))
 
 
 @contextmanager
@@ -177,7 +186,6 @@ def torch_profile(
     logger.info(f"{_PROFILER_LOG_PREFIX} Function: {record_function_name}")
     logger.info(f"{_PROFILER_LOG_PREFIX} Params: {params}")
 
-    # See also torch.profiler.tensorboard_trace_handler
     trace_handler = functools.partial(
         _on_trace_ready,
         out_prefix=out_prefix,

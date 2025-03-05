@@ -132,5 +132,9 @@ class ProfilerParams(BaseParams):
     Set to -1 to make it unlimited.
     """
 
+    tensorboard_profile: bool = False
+    """Download tensorboard profiler trace
+    """
+
     schedule: ProfilerScheduleParams = field(default_factory=ProfilerScheduleParams)
     """Parameters that define what subset of training steps to profile."""
