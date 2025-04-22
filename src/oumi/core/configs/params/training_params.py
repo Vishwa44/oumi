@@ -343,6 +343,16 @@ class TrainingParams(BaseParams):
     Alternatively, you can use the `wandb login` command to authenticate.
     """
 
+    enable_mlflow: bool = False
+    """Whether to enable MLflow logging.
+
+    If True, MLflow will be used for experiment tracking and visualization.
+    If you want to use MLflow, you must set the `MLFLOW_TRACKING_URI` environment
+    variable to specify the tracking server URI and the `MLFLOW_EXPERIMENT_ID` or
+    `MLFLOW_EXPERIMENT_NAME` environment variable to specify the experiment to report
+    the run to.
+    """
+
     enable_tensorboard: bool = True
     """Whether to enable TensorBoard logging.
 
@@ -755,6 +765,8 @@ class TrainingParams(BaseParams):
             report_to.append("wandb")
         if self.enable_tensorboard:
             report_to.append("tensorboard")
+        if self.enable_mlflow:
+            report_to.append("mlflow")
         if len(report_to) == 0:
             report_to.append("none")
         return report_to
@@ -794,6 +806,15 @@ class TrainingParams(BaseParams):
                     "reward_functions may only be defined for the TRL_GRPO trainer. "
                     f"Actual: {self.trainer_type}"
                 )
+
+        # TODO: #1540 - Remove when TRL bug is fixed.
+        if (
+            self.trainer_type == TrainerType.TRL_GRPO
+            and self.include_performance_metrics
+        ):
+            raise ValueError(
+                "`include_performance_metrics` is not supported for TRL_GRPO trainer."
+            )
 
     @property
     def telemetry_dir(self) -> Optional[Path]:
